@@ -1,3 +1,5 @@
+Goal: be able to create branches and merge.
+
 # Architecture
 
 ## Init
@@ -8,10 +10,13 @@
 classDiagram
     GotMainFolder --> Meta
     GotMainFolder --> Blob
+    GotMainFolder --> Stage
+
     Blob --> Commit
     Commit --> FileDelta
     Blob --> FTree
-    GotMainFolder --> Config
+    FTree --> Branches
+    GotMainFolder --> Statefile
     class GotMainFolder {
         name: .got
     }
@@ -32,7 +37,10 @@ classDiagram
     class Blob {
         intermediate folder
     }
-    class Config {
+    class Statefile {
         Possible configs
+    }
+    class Stage {
+        Staging Folder
     }
 ```
