@@ -15,11 +15,13 @@ type FolderStructure struct {
 	FTree     bool
 	Branches  bool
 	Statefile bool
+	Stage     bool
 }
 
 func InitGotProject(cmd *cobra.Command, args []string) {
 	var err Err
 	var ex string
+	var base string = ".got"
 
 	ex, err.E = os.Executable()
 	err.Handle()
@@ -32,7 +34,8 @@ func InitGotProject(cmd *cobra.Command, args []string) {
 		if !ensureGotProjectPath() {
 
 			log.Info("No .got project path found, creating one!")
-			os.Mkdir(".got", 0755)
+			err.E = os.Mkdir(base, 0755)
+			err.HandleFatal()
 
 		} else {
 
@@ -52,10 +55,12 @@ func InitGotProject(cmd *cobra.Command, args []string) {
 
 func ensureGotProjectPath() bool {
 	var stat os.FileInfo
-	var err Err
+	var err error
 
-	stat, err.E = os.Stat(".got")
-	err.Handle()
+	stat, err = os.Stat(".got")
+	if err != nil {
+		return false
+	}
 
 	log.Debugf("%+v\n", stat)
 	return true
@@ -107,7 +112,7 @@ func (f *FolderStructure) ensureStructure() {
 	}
 
 	// Check if the branches folder is present
-	_, err = os.Stat(".got/branches")
+	_, err = os.Stat(".got/blob/branches")
 	if err != nil {
 		f.Branches = false
 		log.Debug("Branches folder not found")
@@ -125,6 +130,17 @@ func (f *FolderStructure) ensureStructure() {
 		f.Statefile = true
 		log.Debug("Statefile found")
 	}
+
+	// Check if the stage Folder is present
+	_, err = os.Stat(".got/stage")
+	if err != nil {
+		f.Stage = false
+		log.Debug("Stage folder not found")
+	} else {
+		f.Stage = true
+		log.Debug("Stage folder found")
+	}
+
 }
 
 // See README.md#Architecture#Init#Folder-Structure
@@ -138,31 +154,46 @@ func (f *FolderStructure) setupStructure() {
 	// Create the metadata folder
 	if !f.Meta {
 		err.E = os.Mkdir(filepath.Join(base, "meta"), 0755)
-		err.Handle()
+		err.HandleWarn()
 	}
 
 	// Create the blobs folder
 	if !f.Blob {
 		err.E = os.Mkdir(filepath.Join(base, "blob"), 0755)
-		err.Handle()
+		err.HandleWarn()
 	}
 
 	// Create the commits folder
 	if !f.Commits {
 		err.E = os.Mkdir(filepath.Join(base, "blob", "commits"), 0755)
-		err.Handle()
+		err.HandleError()
 	}
 
 	// Create the ftree folder
 	if !f.FTree {
 		err.E = os.Mkdir(filepath.Join(base, "blob", "ftree"), 0755)
-		err.Handle()
+		err.HandleError()
 	}
 
 	// Create the branches folder
 	if !f.Branches {
-		err.E = os.Mkdir(filepath.Join(base, "branches"), 0755)
-		err.Handle()
+		err.E = os.Mkdir(filepath.Join(base, "blob", "branches"), 0755)
+		err.HandleError()
+	}
+
+	// Create the Staging Area
+	if !f.Stage {
+		err.E = os.Mkdir(filepath.Join(base, "stage"), 0755)
+		err.HandleError()
+	}
+
+	// Create the statefile
+	if !f.Statefile {
+		var statefile Statefile
+		statefile.CurrectBranch = "main"
+		statefile.Branches = []string{"main"}
+		statefile.Commits = []Commits{}
+		statefile.Write()
 	}
 
 	log.Info("Project structure setup complete!")
