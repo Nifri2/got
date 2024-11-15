@@ -1,3 +1,5 @@
+Boredom/Fun Excercise: Rewrite Git 
+
 Goal: be able to create branches and merge.
 
 # Architecture

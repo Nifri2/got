@@ -7,6 +7,7 @@ import (
 )
 
 type Statefile struct {
+	Name          string    `yaml:"name"`
 	CurrectBranch string    `yaml:"currectBranch"`
 	Branches      []string  `yaml:"branches"`
 	Commits       []Commits `yaml:"commits"`
@@ -27,5 +28,18 @@ func (s *Statefile) Write() {
 	err.Handle()
 
 	err.E = os.WriteFile(file, yamlFile, 0644)
+	err.Handle()
+}
+
+func (s *Statefile) Read() {
+	var err Err
+	var yamlFile []byte
+
+	// Read the statefile
+	file := ".got/statefile"
+	yamlFile, err.E = os.ReadFile(file)
+	err.Handle()
+
+	err.E = yaml.Unmarshal(yamlFile, s)
 	err.Handle()
 }

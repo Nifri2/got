@@ -16,20 +16,38 @@ type FolderStructure struct {
 	Branches  bool
 	Statefile bool
 	Stage     bool
+	Name      string
 }
 
 func InitGotProject(cmd *cobra.Command, args []string) {
 	var err Err
 	var ex string
 	var base string = ".got"
+	var fs FolderStructure
 
 	ex, err.E = os.Executable()
 	err.Handle()
 
 	current_path := filepath.Dir(ex)
 
-	log.Info("Initializing got project in", current_path)
+	if fs.checkProjectExists() {
+		log.Fatalf("Project '%s' already exists in '%s'", fs.Name, current_path)
+	}
 
+	if len(args) == 0 {
+		log.Fatal("Project name not provided! \n Use --name flag to provide a name\n eg: got init --name <project_name>\n or provide the name as an argument eg: got init <project_name>")
+	}
+
+	if cmd.Flags().Lookup("name").Changed {
+		fs.Name, err.E = cmd.Flags().GetString("name")
+		err.HandleFatal()
+		log.Info("Creating got project: ", fs.Name)
+	} else {
+		fs.Name = args[0]
+		log.Info("Creating got project: ", fs.Name)
+	}
+
+	log.Info("Initializing got project in", current_path)
 	for {
 		if !ensureGotProjectPath() {
 
@@ -45,7 +63,6 @@ func InitGotProject(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	var fs FolderStructure
 	fs.ensureStructure()
 	log.Debugf("%+v\n", fs)
 
@@ -64,6 +81,27 @@ func ensureGotProjectPath() bool {
 
 	log.Debugf("%+v\n", stat)
 	return true
+}
+
+func (f *FolderStructure) checkProjectExists() bool {
+	// Check if the project already exists
+	// If yes, return true
+	// If no, return false
+	var sf Statefile
+
+	_, err := os.Stat(".got")
+	if err != nil {
+		return false
+	}
+
+	sf.Read()
+	log.Debugf("%+v\n", sf)
+
+	if sf.Name != "" {
+		f.Name = sf.Name
+		return true
+	}
+	return false
 }
 
 func (f *FolderStructure) ensureStructure() {
@@ -191,6 +229,7 @@ func (f *FolderStructure) setupStructure() {
 	if !f.Statefile {
 		var statefile Statefile
 		statefile.CurrectBranch = "main"
+		statefile.Name = f.Name
 		statefile.Branches = []string{"main"}
 		statefile.Commits = []Commits{}
 		statefile.Write()
