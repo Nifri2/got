@@ -1,6 +1,5 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
@@ -13,13 +12,14 @@ import (
 // stageCmd represents the stage command
 var stageCmd = &cobra.Command{
 	Use:   "stage",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Add files to the staging area",
+	Long: `Add files to the staging area
+	eg: got stage <file1> <file2> <file3>
+It also works with wildcards, folders or globs
+	eg: got stage *.txt
+	    got stage folder/*
+	    got stage .
+Recursive behavior can be DISABLED with the -r flag.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("stage called")
 	},

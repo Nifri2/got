@@ -1,4 +1,4 @@
-package cmd
+package helpers
 
 import (
 	"os"
@@ -11,6 +11,7 @@ type Statefile struct {
 	CurrectBranch string    `yaml:"currectBranch"`
 	Branches      []string  `yaml:"branches"`
 	Commits       []Commits `yaml:"commits"`
+	Error         *Err
 }
 type Commits struct {
 	Sha     int    `yaml:"sha"`

@@ -1,9 +1,10 @@
-package cmd
+package init_logic
 
 import (
 	"os"
 	"path/filepath"
 
+	helpers "github.com/nifri2/got/cmd/helpers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -20,7 +21,7 @@ type FolderStructure struct {
 }
 
 func InitGotProject(cmd *cobra.Command, args []string) {
-	var err Err
+	var err helpers.Err
 	var ex string
 	var base string = ".got"
 	var fs FolderStructure
@@ -87,7 +88,7 @@ func (f *FolderStructure) checkProjectExists() bool {
 	// Check if the project already exists
 	// If yes, return true
 	// If no, return false
-	var sf Statefile
+	var sf helpers.Statefile
 
 	_, err := os.Stat(".got")
 	if err != nil {
@@ -184,7 +185,7 @@ func (f *FolderStructure) ensureStructure() {
 // See README.md#Architecture#Init#Folder-Structure
 
 func (f *FolderStructure) setupStructure() {
-	var err Err
+	var err helpers.Err
 
 	var base string = ".got"
 	log.Info("Setting up project structure...")
@@ -227,11 +228,11 @@ func (f *FolderStructure) setupStructure() {
 
 	// Create the statefile
 	if !f.Statefile {
-		var statefile Statefile
+		var statefile helpers.Statefile
 		statefile.CurrectBranch = "main"
 		statefile.Name = f.Name
 		statefile.Branches = []string{"main"}
-		statefile.Commits = []Commits{}
+		statefile.Commits = []helpers.Commits{}
 		statefile.Write()
 	}
 
